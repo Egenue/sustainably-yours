@@ -75,7 +75,12 @@ const Register = () => {
     setIsLoading(true);
     try {
       const { confirmPassword, ...registerData } = data;
-      await register(registerData);
+      await register({
+        name: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        role: registerData.role,
+      });
       toast({
         title: "Registration successful",
         description: "Your buyer account has been created!",
@@ -96,7 +101,14 @@ const Register = () => {
     setIsLoading(true);
     try {
       const { confirmPassword, ...registerData } = data;
-      await register(registerData);
+      await register({
+        name: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        role: registerData.role,
+        businessName: registerData.businessName,
+        businessAddress: registerData.businessAddress,
+      });
       toast({
         title: "Registration successful",
         description: "Your seller account has been created!",

@@ -15,12 +15,12 @@ router.get('/', optionalAuth, async (req, res) => {
     const { category, sortBy, search, page = 1, limit = 20 } = req.query;
 
     // Build query
-    const query = {};
+    const queryFilter = {};
     if (category && category !== 'all') {
-      query.category = category;
+      queryFilter.category = category;
     }
     if (search) {
-      query.$or = [
+      queryFilter.$or = [
         { name: { $regex: search, $options: 'i' } },
         { brand: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
@@ -48,13 +48,13 @@ router.get('/', optionalAuth, async (req, res) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    const products = await Product.find(query)
+    const products = await Product.find(queryFilter)
       .populate('ratings', 'rating comment userName date')
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await Product.countDocuments(query);
+    const total = await Product.countDocuments(queryFilter);
 
     res.json({
       products,

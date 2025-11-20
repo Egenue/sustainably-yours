@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+new.php
 
 # Editor directories and files
 .vscode/*

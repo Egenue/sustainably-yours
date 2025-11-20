@@ -9,12 +9,19 @@ interface BusinessCardProps {
 }
 
 export const BusinessCard = ({ business }: BusinessCardProps) => {
+  const businessId = (business as any)._id || business.id;
+  const logoUrl = business.logo?.startsWith('http') 
+    ? business.logo 
+    : business.logo?.startsWith('/uploads') 
+      ? `http://localhost:5000${business.logo}`
+      : business.logo || 'https://via.placeholder.com/200';
+
   return (
-    <Link to={`/business/${business.id}`}>
+    <Link to={`/business/${businessId}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full group">
         <div className="relative h-32 bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
           <img 
-            src={business.logo} 
+            src={logoUrl} 
             alt={business.name}
             className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity"
           />
@@ -36,11 +43,13 @@ export const BusinessCard = ({ business }: BusinessCardProps) => {
             <span>{business.location}</span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            {business.categories.slice(0, 2).map((category) => (
-              <Badge key={category} variant="outline" className="text-xs">
-                {category}
-              </Badge>
-            ))}
+            {business.categories && business.categories.length > 0 ? (
+              business.categories.slice(0, 2).map((category) => (
+                <Badge key={category} variant="outline" className="text-xs">
+                  {category}
+                </Badge>
+              ))
+            ) : null}
           </div>
         </CardContent>
 

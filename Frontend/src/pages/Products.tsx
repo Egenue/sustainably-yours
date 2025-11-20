@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { mockProducts } from "@/data/mockData";
+import { productsAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter } from "lucide-react";
+import { Filter, Loader2 } from "lucide-react";
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -12,17 +13,16 @@ const Products = () => {
 
   const categories = ["all", "Clothing", "Personal Care", "Home & Kitchen", "Electronics", "Sports & Fitness"];
 
-  const filteredProducts = mockProducts.filter(
-    product => selectedCategory === "all" || product.category === selectedCategory
-  );
-
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === "rating") return b.averageRating - a.averageRating;
-    if (sortBy === "sustainability") return b.sustainabilityScore - a.sustainabilityScore;
-    if (sortBy === "price-low") return a.price - b.price;
-    if (sortBy === "price-high") return b.price - a.price;
-    return 0;
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['products', selectedCategory, sortBy],
+    queryFn: () => productsAPI.getAll({
+      category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      sortBy,
+      limit: 100,
+    }),
   });
+
+  const products = data?.products || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,17 +76,35 @@ const Products = () => {
           </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-
-        {sortedProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No products found with current filters</p>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-destructive">Failed to load products. Please try again later.</p>
+          </div>
+        )}
+
+        {/* Products Grid */}
+        {!isLoading && !error && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <ProductCard key={product._id || product.id} product={product} />
+              ))}
+            </div>
+
+            {products.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No products found with current filters</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

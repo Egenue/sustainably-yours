@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { UserRole } from "@/types";
 import { Leaf, Building2, ShoppingBag } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const buyerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -42,7 +43,9 @@ type SellerFormValues = z.infer<typeof sellerSchema>;
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [userRole, setUserRole] = useState<UserRole>("buyer");
+  const [isLoading, setIsLoading] = useState(false);
 
   const buyerForm = useForm<BuyerFormValues>({
     resolver: zodResolver(buyerSchema),
@@ -68,24 +71,46 @@ const Register = () => {
     },
   });
 
-  const onBuyerSubmit = (data: BuyerFormValues) => {
-    // TODO: Implement actual registration logic with backend
-    console.log("Buyer registration:", data);
-    toast({
-      title: "Registration successful",
-      description: "Your buyer account has been created!",
-    });
-    navigate("/login");
+  const onBuyerSubmit = async (data: BuyerFormValues) => {
+    setIsLoading(true);
+    try {
+      const { confirmPassword, ...registerData } = data;
+      await register(registerData);
+      toast({
+        title: "Registration successful",
+        description: "Your buyer account has been created!",
+      });
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const onSellerSubmit = (data: SellerFormValues) => {
-    // TODO: Implement actual registration logic with backend
-    console.log("Seller registration:", data);
-    toast({
-      title: "Registration successful",
-      description: "Your seller account has been created!",
-    });
-    navigate("/login");
+  const onSellerSubmit = async (data: SellerFormValues) => {
+    setIsLoading(true);
+    try {
+      const { confirmPassword, ...registerData } = data;
+      await register(registerData);
+      toast({
+        title: "Registration successful",
+        description: "Your seller account has been created!",
+      });
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRoleChange = (role: UserRole) => {
@@ -183,8 +208,8 @@ const Register = () => {
                       )}
                     />
 
-                    <Button type="submit" className="w-full">
-                      Create Buyer Account
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Creating account..." : "Create Buyer Account"}
                     </Button>
                   </form>
                 </Form>
@@ -280,8 +305,8 @@ const Register = () => {
                       )}
                     />
 
-                    <Button type="submit" className="w-full">
-                      Create Seller Account
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Creating account..." : "Create Seller Account"}
                     </Button>
                   </form>
                 </Form>

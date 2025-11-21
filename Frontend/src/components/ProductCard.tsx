@@ -9,19 +9,12 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const productId = (product as any)._id || product.id;
-  const imageUrl = product.image?.startsWith('http') 
-    ? product.image 
-    : product.image?.startsWith('/uploads') 
-      ? `http://localhost:5000${product.image}`
-      : product.image || 'https://via.placeholder.com/400';
-
   return (
-    <Link to={`/product/${productId}`}>
+    <Link to={`/product/${product.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full group">
         <div className="relative aspect-square overflow-hidden">
           <img 
-            src={imageUrl} 
+            src={product.image} 
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -40,13 +33,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             {product.description}
           </p>
           <div className="flex items-center gap-2 flex-wrap">
-            {product.certifications && product.certifications.length > 0 ? (
-              product.certifications.slice(0, 2).map((cert) => (
-                <Badge key={cert} variant="outline" className="text-xs">
-                  {cert}
-                </Badge>
-              ))
-            ) : null}
+            {product.certifications.slice(0, 2).map((cert) => (
+              <Badge key={cert} variant="outline" className="text-xs">
+                {cert}
+              </Badge>
+            ))}
           </div>
         </CardContent>
 

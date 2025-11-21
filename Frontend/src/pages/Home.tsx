@@ -1,25 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { BusinessCard } from "@/components/BusinessCard";
-import { productsAPI, businessesAPI } from "@/lib/api";
-import { Leaf, Award, Users, TrendingUp, Loader2 } from "lucide-react";
+import { mockProducts, mockBusinesses } from "@/data/mockData";
+import { Leaf, Award, Users, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Home = () => {
-  const { data: productsData } = useQuery({
-    queryKey: ['products', 'featured'],
-    queryFn: () => productsAPI.getAll({ limit: 3, sortBy: 'rating' }),
-  });
-
-  const { data: businessesData } = useQuery({
-    queryKey: ['businesses', 'featured'],
-    queryFn: () => businessesAPI.getAll({ limit: 2 }),
-  });
-
-  const featuredProducts = productsData?.products?.slice(0, 3) || [];
-  const featuredBusinesses = businessesData?.businesses || [];
+  const featuredProducts = mockProducts.slice(0, 3);
+  const featuredBusinesses = mockBusinesses;
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,17 +93,11 @@ const Home = () => {
               <Button variant="outline">View All</Button>
             </Link>
           </div>
-          {featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredProducts.map((product: any) => (
-                <ProductCard key={product._id || product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No featured products available</p>
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -130,17 +113,11 @@ const Home = () => {
               <Button variant="outline">View All</Button>
             </Link>
           </div>
-          {featuredBusinesses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {featuredBusinesses.map((business: any) => (
-                <BusinessCard key={business._id || business.id} business={business} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No featured businesses available</p>
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {featuredBusinesses.map((business) => (
+              <BusinessCard key={business.id} business={business} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -155,11 +132,9 @@ const Home = () => {
               Your ratings help others make informed decisions. Join our community and 
               contribute to a more sustainable future.
             </p>
-            <Link to="/products">
-              <Button size="lg" variant="secondary" className="text-lg">
-                Start Rating Now
-              </Button>
-            </Link>
+            <Button size="lg" variant="secondary" className="text-lg">
+              Start Rating Now
+            </Button>
           </div>
         </div>
       </section>

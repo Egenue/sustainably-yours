@@ -12,7 +12,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { UserRole } from "@/types";
 import { Leaf } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -24,9 +23,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [userRole, setUserRole] = useState<UserRole>("buyer");
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,24 +34,15 @@ const Login = () => {
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
-    try {
-      await login(data.email, data.password, data.role);
-      toast({
-        title: "Login successful",
-        description: `Welcome back as a ${data.role}!`,
-      });
-      navigate("/");
-    } catch (error: any) {
-      toast({
-        title: "Login failed",
-        description: error.message || "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: LoginFormValues) => {
+    // TODO: Implement actual authentication logic with backend
+    console.log("Login attempt:", data);
+    toast({
+      title: "Login successful",
+      description: `Welcome back as a ${data.role}!`,
+    });
+    // Navigate based on user role or to home
+    navigate("/");
   };
 
   const handleRoleChange = (role: UserRole) => {
@@ -127,8 +115,8 @@ const Login = () => {
                     )}
                   />
 
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : `Sign in as ${userRole === "buyer" ? "Buyer" : "Seller"}`}
+                  <Button type="submit" className="w-full">
+                    Sign in as {userRole === "buyer" ? "Buyer" : "Seller"}
                   </Button>
                 </form>
               </Form>
@@ -154,3 +142,4 @@ const Login = () => {
 };
 
 export default Login;
+

@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { UserRole } from "@/types";
 import { Leaf } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -23,6 +24,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
+  const { auth } = useAuth();
   const [userRole, setUserRole] = useState<UserRole>("buyer");
 
   const form = useForm<LoginFormValues>({
@@ -34,15 +36,18 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    // TODO: Implement actual authentication logic with backend
-    console.log("Login attempt:", data);
-    toast({
-      title: "Login successful",
-      description: `Welcome back as a ${data.role}!`,
-    });
-    // Navigate based on user role or to home
-    navigate("/");
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      await auth.login(data.email, data.password, data.role);
+      toast({ title: "Login successful", description: `Welcome back as a ${data.role}!` });
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      toast({
+        title: "Login failed",
+        description: err?.response?.data?.message || err?.message || "Unable to sign in",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRoleChange = (role: UserRole) => {

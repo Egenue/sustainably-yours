@@ -55,28 +55,22 @@ const productSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
 // Update averageRating when ratings change
 productSchema.methods.calculateAverageRating = async function () {
   const Rating = mongoose.model('Rating');
-  const ratings = await Rating.find({ productId: this._id });
-  
-  if (ratings.length === 0) {
+  const ratings = await Rating.find({ productId: this._id }).select('rating').lean();
+
+  if (!ratings || ratings.length === 0) {
     this.averageRating = 0;
-    return;
+  } else {
+    const sum = ratings.reduce((acc, r) => acc + (r.rating || 0), 0);
+    // keep one decimal place
+    this.averageRating = Math.round((sum / ratings.length) * 10) / 10;
   }
-  
-  const sum = ratings.reduce((acc, rating) => acc + rating.rating, 0);
-  this.averageRating = Math.round((sum / ratings.length) * 10) / 10;
+
+  // Save without triggering infinite hooks if any
   await this.save();
 };
 

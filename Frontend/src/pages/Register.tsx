@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { UserRole } from "@/types";
 import { Leaf, Building2, ShoppingBag } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 const buyerSchema = z.object({
@@ -39,10 +40,12 @@ const sellerSchema = z.object({
 
 type BuyerFormValues = z.infer<typeof buyerSchema>;
 type SellerFormValues = z.infer<typeof sellerSchema>;
+type RegisterValues = BuyerFormValues | SellerFormValues;
 
 const Register = () => {
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState<UserRole>("buyer");
+  const auth = useAuth();
 
   const buyerForm = useForm<BuyerFormValues>({
     resolver: zodResolver(buyerSchema),
@@ -86,6 +89,20 @@ const Register = () => {
       description: "Your seller account has been created!",
     });
     navigate("/login");
+  };
+
+  const onSubmit = async (data: RegisterValues) => {
+    try {
+      await auth.register(data);
+      toast({ title: "Account created", description: "Welcome!" });
+      navigate("/");
+    } catch (err: any) {
+      toast({
+        title: "Registration failed",
+        description: err?.response?.data?.message || err?.message || "Unable to register",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRoleChange = (role: UserRole) => {

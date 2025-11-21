@@ -1,5 +1,7 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { Business } from "@/types";
+import { getImageUrl } from "@/lib/getImageUrl";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Star, MapPin, Leaf } from "lucide-react";
@@ -9,12 +11,14 @@ interface BusinessCardProps {
 }
 
 export const BusinessCard = ({ business }: BusinessCardProps) => {
+  const logoUrl = getImageUrl(business.logo, 'https://via.placeholder.com/200');
+
   return (
     <Link to={`/business/${business.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full group">
         <div className="relative h-32 bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
           <img 
-            src={business.logo} 
+            src={logoUrl} 
             alt={business.name}
             className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity"
           />

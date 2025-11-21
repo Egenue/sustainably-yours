@@ -1,20 +1,24 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { Product } from "@/types";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Star, Leaf } from "lucide-react";
+import { getImageUrl } from "@/lib/getImageUrl";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
+  const imageUrl = getImageUrl(product.image, 'https://via.placeholder.com/400');
+
   return (
     <Link to={`/product/${product.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full group">
         <div className="relative aspect-square overflow-hidden">
           <img 
-            src={product.image} 
+            src={imageUrl} 
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />

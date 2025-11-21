@@ -2,13 +2,28 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { BusinessCard } from "@/components/BusinessCard";
-import { mockProducts, mockBusinesses } from "@/data/mockData";
+import { productsService } from "@/lib/services/products";
+import { businessesService } from "@/lib/services/businesses";
 import { Leaf, Award, Users, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Home = () => {
-  const featuredProducts = mockProducts.slice(0, 3);
-  const featuredBusinesses = mockBusinesses;
+  const [products, setProducts] = useState([]);
+  const [businesses, setBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    Promise.all([productsService.list({ limit: 6 }), businessesService.list({ limit: 6 })])
+      .then(([pr, br]) => { if (!mounted) return; setProducts(pr.data || []); setBusinesses(br.data || []); })
+      .catch(() => { if (!mounted) return; setProducts([]); setBusinesses([]); })
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
+  }, []);
+
+  const featuredProducts = products.slice(0, 3);
+  const featuredBusinesses = businesses;
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,8 +129,8 @@ const Home = () => {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredBusinesses.map((business) => (
-              <BusinessCard key={business.id} business={business} />
+            {businesses.map((b) => (
+              <BusinessCard key={b._id} business={b} />
             ))}
           </div>
         </div>

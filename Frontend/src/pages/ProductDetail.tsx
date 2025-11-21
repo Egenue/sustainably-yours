@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { RatingDisplay } from "@/components/RatingDisplay";
@@ -5,14 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { mockProducts } from "@/data/mockData";
+import { productsService } from "@/lib/services/products";
+import { API_ORIGIN } from '@/lib/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 import { Leaf, Award, Package, Globe, ArrowLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product = mockProducts.find(p => p.id === id);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    let mounted = true;
+    productsService.get(id)
+      .then((res) => { if (!mounted) return; setProduct(res.data || null); })
+      .catch(() => { if (!mounted) return; setProduct(null); })
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold text-foreground">Loading product details...</h1>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -27,6 +52,8 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  const imageUrl = getImageUrl(product.image, 'https://via.placeholder.com/400');
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,7 +71,7 @@ const ProductDetail = () => {
           {/* Product Image */}
           <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
             <img 
-              src={product.image} 
+              src={imageUrl} 
               alt={product.name}
               className="w-full h-full object-cover"
             />

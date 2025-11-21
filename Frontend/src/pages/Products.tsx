@@ -1,18 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { mockProducts } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
+import { productsService } from "@/lib/services/products";
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("rating");
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const categories = ["all", "Clothing", "Personal Care", "Home & Kitchen", "Electronics", "Sports & Fitness"];
 
-  const filteredProducts = mockProducts.filter(
+  useEffect(() => {
+    let mounted = true;
+    productsService
+      .list()
+      .then((res) => { if (!mounted) return; setProducts(res.data || []); })
+      .catch(() => { if (!mounted) return; setProducts([]); })
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
+  }, []);
+
+  const filteredProducts = products.filter(
     product => selectedCategory === "all" || product.category === selectedCategory
   );
 

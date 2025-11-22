@@ -1,18 +1,33 @@
+"use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { UserRole } from "@/types";
 import { Leaf } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext"; // Fixed path (was "@/context/")
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -24,8 +39,12 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
-  const { auth } = useAuth();
+  const location = useLocation();
+  const { login } = useAuth(); // Fixed: was "auth.login", now "login"
   const [userRole, setUserRole] = useState<UserRole>("buyer");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,20 +56,27 @@ const Login = () => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
     try {
-      await auth.login(data.email, data.password, data.role);
-      toast({ title: "Login successful", description: `Welcome back as a ${data.role}!` });
+      await login(data.email, data.password, data.role);
+      toast({
+        title: "Login successful",
+        description: `Welcome back as a ${data.role}!`,
+      });
       navigate(from, { replace: true });
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Login failed",
-        description: err?.response?.data?.message || err?.message || "Unable to sign in",
+        description: err?.response?.data?.message || err?.message || "Invalid credentials",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRoleChange = (role: UserRole) => {
+  const handleRoleChange = (value: string) => {
+    const role = value as UserRole;
     setUserRole(role);
     form.setValue("role", role);
   };
@@ -67,12 +93,11 @@ const Login = () => {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-            <CardDescription>
-              Sign in to your account to continue
-            </CardDescription>
+            <CardDescription>Sign in to your account to continue</CardDescription>
           </CardHeader>
+
           <CardContent>
-            <Tabs value={userRole} onValueChange={(value) => handleRoleChange(value as UserRole)} className="w-full">
+            <Tabs value={userRole} onValueChange={handleRoleChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="buyer">Buyer</TabsTrigger>
                 <TabsTrigger value="seller">Seller</TabsTrigger>
@@ -99,7 +124,12 @@ const Login = () => {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="you@example.com" {...field} />
+                          <Input
+                            type="email"
+                            placeholder="you@example.com"
+                            disabled={isLoading}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -113,28 +143,41 @@ const Login = () => {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            disabled={isLoading}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <Button type="submit" className="w-full">
-                    Sign in as {userRole === "buyer" ? "Buyer" : "Seller"}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Signing in..." : `Sign in as ${userRole === "buyer" ? "Buyer" : "Seller"}`}
                   </Button>
                 </form>
               </Form>
 
               <div className="mt-6 text-center text-sm">
                 <span className="text-muted-foreground">Don't have an account? </span>
-                <Link to="/register" className="text-primary hover:underline font-medium">
+                <Link
+                  to="/register"
+                  state={{ role: userRole }}
+                  className="text-primary hover:underline font-medium"
+                >
                   {userRole === "buyer" ? "Register as Buyer" : "Register as Seller"}
                 </Link>
               </div>
 
               <div className="mt-4 text-center">
-                <Link to="/register" className="text-sm text-muted-foreground hover:underline">
+                <Link
+                  to="/register"
+                  state={{ role: userRole === "buyer" ? "seller" : "buyer" }}
+                  className="text-sm text-muted-foreground hover:underline"
+                >
                   Create {userRole === "buyer" ? "Seller" : "Buyer"} account instead
                 </Link>
               </div>
@@ -147,4 +190,3 @@ const Login = () => {
 };
 
 export default Login;
-

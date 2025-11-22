@@ -16,7 +16,7 @@ const Home = () => {
   useEffect(() => {
     let mounted = true;
     Promise.all([productsService.list({ limit: 6 }), businessesService.list({ limit: 6 })])
-      .then(([pr, br]) => { if (!mounted) return; setProducts(pr.data || []); setBusinesses(br.data || []); })
+      .then(([pr, br]) => { if (!mounted) return; setProducts(pr.data.products || []); setBusinesses(br.data.businesses || []); })
       .catch(() => { if (!mounted) return; setProducts([]); setBusinesses([]); })
       .finally(() => mounted && setLoading(false));
     return () => { mounted = false; };
@@ -60,42 +60,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-card">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Leaf className="h-8 w-8 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-foreground mb-1">500+</div>
-              <div className="text-sm text-muted-foreground">Eco Products</div>
-            </div>
-            <div className="text-center">
-              <div className="bg-accent/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Award className="h-8 w-8 text-accent" />
-              </div>
-              <div className="text-3xl font-bold text-foreground mb-1">200+</div>
-              <div className="text-sm text-muted-foreground">Green Businesses</div>
-            </div>
-            <div className="text-center">
-              <div className="bg-success/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Users className="h-8 w-8 text-success" />
-              </div>
-              <div className="text-3xl font-bold text-foreground mb-1">10K+</div>
-              <div className="text-sm text-muted-foreground">Active Users</div>
-            </div>
-            <div className="text-center">
-              <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                <TrendingUp className="h-8 w-8 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-foreground mb-1">25K+</div>
-              <div className="text-sm text-muted-foreground">Reviews</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Featured Products */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -110,7 +74,7 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>

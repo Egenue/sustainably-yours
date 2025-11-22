@@ -14,7 +14,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const imageUrl = getImageUrl(product.image, 'https://via.placeholder.com/400');
 
   return (
-    <Link to={`/product/${product.id}`}>
+    <Link to={`/product/${product._id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full group">
         <div className="relative aspect-square overflow-hidden">
           <img 

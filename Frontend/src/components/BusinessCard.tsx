@@ -14,7 +14,7 @@ export const BusinessCard = ({ business }: BusinessCardProps) => {
   const logoUrl = getImageUrl(business.logo, 'https://via.placeholder.com/200');
 
   return (
-    <Link to={`/business/${business.id}`}>
+    <Link to={`/business/${business._id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full group">
         <div className="relative h-32 bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
           <img 

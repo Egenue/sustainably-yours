@@ -7,9 +7,6 @@ import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
-// @route   GET /api/businesses
-// @desc    Get all businesses
-// @access  Public
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const { category, search, page = 1, limit = 20 } = req.query;
@@ -51,9 +48,6 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// @route   GET /api/businesses/:id
-// @desc    Get single business
-// @access  Public
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const business = await Business.findById(req.params.id)

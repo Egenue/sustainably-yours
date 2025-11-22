@@ -6,7 +6,6 @@ import { businessesService } from "@/lib/services/businesses";
 
 const Businesses = () => {
   const [businesses, setBusinesses] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -14,7 +13,6 @@ const Businesses = () => {
       .list()
       .then((res) => { if (!mounted) return; setBusinesses(res.data || []); })
       .catch(() => { if (!mounted) return; setBusinesses([]); })
-      .finally(() => mounted && setLoading(false));
     return () => { mounted = false; };
   }, []);
 
@@ -33,15 +31,11 @@ const Businesses = () => {
           <p className="text-muted-foreground">Companies committed to environmental responsibility</p>
         </div>
 
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {businesses.map((business) => (
-              <BusinessCard key={business.id} business={business} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {businesses.map((business) => (
+            <BusinessCard key={business._id} business={business} />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
-const express = require('express');
-const User = require('../models/User.js');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import express from 'express';
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import * as auth from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Middleware to verify JWT
-function auth(req, res, next) {
+function verifyToken(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token' });
   try {
@@ -18,7 +19,7 @@ function auth(req, res, next) {
 }
 
 // Get current user profile
-router.get('/me', auth, async (req, res) => {
+router.get('/me', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
@@ -28,7 +29,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // Update profile
-router.put('/me', auth, async (req, res) => {
+router.put('/me', verifyToken, async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const update = {};
@@ -42,4 +43,7 @@ router.put('/me', auth, async (req, res) => {
   }
 });
 
-export default router; 
+// Example protected route
+// router.get('/profile', auth.protect, async (req, res) => { ... });
+
+export default router;
